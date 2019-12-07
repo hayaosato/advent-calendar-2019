@@ -35,5 +35,5 @@ def main(event, _):
     """
     Lambda handler
     """
-    message = event['Records'][0]['body'] + "がアップロードされました。"
+    message = event['Records'][0]['s3']['object']['key'] + "がアップロードされました。"
     slack_notification(message)
