@@ -2,13 +2,13 @@
 resource "aws_iam_role" "default" {
   name               = var.service_name
   description        = "IAM Rolw for ${var.service_name}"
-  assume_role_policy = file("${var.service_name}-role.json")
+  assume_role_policy = file("policies/${var.service_name}-role.json")
 }
 
 resource "aws_iam_policy" "default" {
   name        = var.service_name
   description = "IAM Policy for ${var.service_name}"
-  policy      = file("${var.service_name}-policy.json")
+  policy      = file("policies/${var.service_name}-policy.json")
 }
 
 resource "aws_iam_role_policy_attachment" "default" {
@@ -52,7 +52,7 @@ resource "aws_lambda_permission" "default" {
 }
 
 resource "aws_s3_bucket" "default" {
-  name = var.service_name
+  bucket = var.service_name
 }
 
 resource "aws_s3_bucket_notification" "default" {

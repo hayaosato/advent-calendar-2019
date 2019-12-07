@@ -35,4 +35,5 @@ def main(event, _):
     """
     Lambda handler
     """
-    slack_notification(event)
+    message = event['Records'][0]['body'] + "がアップロードされました。"
+    slack_notification(message)
