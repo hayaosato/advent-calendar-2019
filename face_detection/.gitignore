@@ -1,4 +1,8 @@
 output
-start-face-detection
-get-face-detection
+start-face-detection/*
+!start-face-detection/main.py
+!start-face-detection/requirements.txt
+get-face-detection/*
+!get-face-detection/main.py
+!get-face-detection/requirements.txt
 archive
