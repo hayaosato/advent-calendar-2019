@@ -44,20 +44,22 @@ resource "aws_lambda_function" "default" {
 
 // SNS Resources
 resource "aws_lambda_permission" "default" {
-  statement_id  = "AllowExecutionFromSNS"
+  statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.default.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.default.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.default.arn
 }
 
-resource "aws_sns_topic" "default" {
-  name            = var.service_name
-  delivery_policy = file("sns_delivery_policy.json")
+resource "aws_s3_bucket" "default" {
+  name = var.service_name
 }
 
-resource "aws_sns_topic_subscription" "default" {
-  topic_arn = aws_sns_topic.default.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.default.arn
+resource "aws_s3_bucket_notification" "default" {
+  bucket = aws_s3_bucket.default.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.default.arn
+    events              = ["s3:ObjectCreated:*"]
+  }
 }
