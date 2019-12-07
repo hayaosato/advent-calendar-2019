@@ -25,11 +25,11 @@ resource "aws_cloudwatch_log_group" "default" {
 data archive_file "default" {
   type        = "zip"
   source_dir  = "src"
-  output_path = var.output_path
+  output_path = "${var.service_name}.zip"
 }
 
 resource "aws_lambda_function" "default" {
-  filename         = var.output_path
+  filename         = "${var.service_name}.zip"
   function_name    = var.service_name
   role             = aws_iam_role.default.arn
   handler          = "main.main"
