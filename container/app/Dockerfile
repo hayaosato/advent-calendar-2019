@@ -3,6 +3,7 @@ FROM golang:1.13.5
 ENV GOPATH $GOPATH:/go
 ENV PATH $PATH:$GOPATH/bin
 WORKDIR /go/src/app
+COPY . /go/src/app
 
 RUN apt update &&\
   go get "github.com/go-sql-driver/mysql" &&\
