@@ -1,9 +1,9 @@
 variable "image_name" {
-  default = "beego_app"
+  default = "beego"
 }
 
 variable "docker_dir" {
-  default = "../app"
+  default = ".."
 }
 
 variable "hostname" {
