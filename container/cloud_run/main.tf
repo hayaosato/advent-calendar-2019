@@ -15,3 +15,24 @@ resource "null_resource" "default" {
     command = "docker push ${var.hostname}/${var.project_id}/${var.image_name}"
   }
 }
+
+resource "google_cloud_run_service" "default" {
+  name     = "${var.image_name}"
+  location = var.region
+
+  template {
+    spec {
+      containers {
+        image = "${var.hostname}/${var.project_id}/${var.image_name}"
+        resources {
+          limits = { "memory" : "512Mi" }
+        }
+      }
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
