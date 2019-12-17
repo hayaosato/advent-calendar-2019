@@ -11,7 +11,7 @@ def main():
     """
     client = boto3.client('ecs')
     response = client.run_task(
-        cluster='sample-python',
+        cluster=os.environ['CLUSTER_NAME'],
         count=1,
         launchType='FARGATE',
         networkConfiguration={
@@ -28,7 +28,7 @@ def main():
         overrides={
             'containerOverrides': [
                 {
-                    'name': 'sample-python',
+                    'name': 'hoge',
                     'command': [
                         'python',
                         'main.py',
