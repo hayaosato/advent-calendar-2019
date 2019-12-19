@@ -5,10 +5,11 @@ import os
 import boto3
 
 
-def main():
+def main(event, _):
     """
     hoge
     """
+    filename = event['Records'][0]['s3']['bucket']['name']
     client = boto3.client('ecs')
     response = client.run_task(
         cluster=os.environ['CLUSTER_NAME'],
@@ -28,15 +29,15 @@ def main():
         overrides={
             'containerOverrides': [
                 {
-                    'name': 'hoge',
+                    'name': 'hogehoge',
                     'command': [
                         'python',
                         'main.py',
-                        'ほげ'
+                        'ほげ{}'.format(filename)
                     ]
                 },
             ]
         },
-        taskDefinition='python-sample:2'
+        taskDefinition=os.environ['TASK_DEFINITION']
     )
     print(response)

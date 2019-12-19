@@ -38,25 +38,72 @@ resource "aws_lambda_function" "default" {
       CLUSTER_NAME      = var.service_name
       SUBNET_ID         = var.subnet_id
       SECURITY_GROUP_ID = var.security_group_id
+      TASK_DEFINITION   = aws_ecs_task_definition.default.revision
     }
   }
 }
 
+resource "aws_s3_bucket" "default" {
+  bucket = var.run_task
+}
+
+resource "aws_s3_bucket_notification" "default" {
+  bucket = aws_s3_bucket.default.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.default.arn
+    events              = ["s3:ObjectCreated:*"]
+  }
+}
+
+resource "aws_lambda_permission" "start_face_detection" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.default.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.default.arn
+}
+
+resource "aws_cloudwatch_log_group" "fargate" {
+  name = "/ecs/${var.service_name}"
+}
 
 resource "aws_ecs_cluster" "default" {
   name = var.service_name
 }
 
+resource "aws_iam_role" "fargate" {
+  name               = "fargate-${var.service_name}"
+  description        = "IAM Rolw for ${var.service_name}"
+  assume_role_policy = file("${var.service_name}-role.json")
+}
+
+resource "aws_iam_policy" "fargate" {
+  name        = "fargate-${var.service_name}"
+  description = "IAM Policy for ${var.service_name}"
+  policy      = file("${var.service_name}-policy.json")
+}
+
+resource "aws_iam_role_policy_attachment" "fargate" {
+  role       = aws_iam_role.fargate.name
+  policy_arn = aws_iam_policy.fargate.arn
+}
+
 resource "aws_ecs_task_definition" "default" {
-  family                = var.service_name
-  container_definitions = <<EOF
+  family                   = var.service_name
+  container_definitions    = <<EOF
 [
   {
-    "name": "first",
-    "image": "244178420992.dkr.ecr.ap-northeast-1.amazonaws.com/sample-python",
+    "name": "${var.service_name}",
+    "image": "${var.ecr_image_arn}",
     "essential": true,
     "memory": 256
   }
 ]
 EOF
+  network_mode             = "awsvpc"
+  execution_role_arn       = aws_iam_role.fargate.arn
+  cpu                      = 1024
+  memory                   = 2048
+  requires_compatibilities = ["FARGATE"]
 }
