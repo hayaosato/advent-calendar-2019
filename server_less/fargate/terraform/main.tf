@@ -56,7 +56,7 @@ resource "aws_s3_bucket_notification" "default" {
   }
 }
 
-resource "aws_lambda_permission" "start_face_detection" {
+resource "aws_lambda_permission" "default" {
   statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.default.arn
@@ -64,11 +64,13 @@ resource "aws_lambda_permission" "start_face_detection" {
   source_arn    = aws_s3_bucket.default.arn
 }
 
+
+// Fargate resources
 resource "aws_cloudwatch_log_group" "fargate" {
   name = "/ecs/${var.service_name}"
 }
 
-resource "aws_ecs_cluster" "default" {
+resource "aws_ecs_cluster" "fargate" {
   name = var.service_name
 }
 
@@ -90,8 +92,8 @@ resource "aws_iam_role_policy_attachment" "fargate" {
 }
 
 resource "aws_ecs_task_definition" "default" {
-  family                   = var.service_name
-  container_definitions    = <<EOF
+  family                = var.service_name
+  container_definitions = <<EOF
 [
   {
     "name": "${var.service_name}",
@@ -101,9 +103,9 @@ resource "aws_ecs_task_definition" "default" {
   }
 ]
 EOF
-  network_mode             = "awsvpc"
-  execution_role_arn       = aws_iam_role.fargate.arn
-  cpu                      = 1024
-  memory                   = 2048
+  network_mode = "awsvpc"
+  execution_role_arn = aws_iam_role.fargate.arn
+  cpu = 1024
+  memory = 2048
   requires_compatibilities = ["FARGATE"]
 }
